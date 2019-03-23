@@ -1,8 +1,8 @@
-from utils import errorhandler
+from utils.errorhandler import handle_error
+from utils.http import get_html
 
 
 if __name__ == '__main__':
-    def f():
-        raise Exception("HELLO!")
-
-    errorhandler.handle_error(f)
+    body, ok = get_html(url="http://www.google.com")
+    print(ok)
+    print(body)
