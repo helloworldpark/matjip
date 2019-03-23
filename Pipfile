@@ -1,0 +1,17 @@
+[[source]]
+url = "http://mirror.kakao.com/pypi/simple/"
+verify_ssl = false
+name = "kakao"
+
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = {version=">=2.20.0", index="kakao"}
+simplejson = {version=">=3.13.2", index="kakao"}
+beautifulsoup4 = {version=">=4.7.1", index="kakao"}
+
+[requires]
+python_version = "3.7"
