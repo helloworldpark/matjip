@@ -1,8 +1,7 @@
 from utils.errorhandler import handle_error
 from utils.http import get_html
+from tabelog import parser
 
 
 if __name__ == '__main__':
-    body, ok = get_html(url="http://www.google.com")
-    print(ok)
-    print(body)
+    parser.collect_info_sapporo(page=30)
