@@ -55,7 +55,7 @@ def collect_info_sapporo(page):
         return False, page
 
     # start parsing
-    soup = BeautifulSoup(body, features="html.parser")
+    soup = BeautifulSoup(body, features="lxml")
 
     shops = soup.select(
         '#column-main > ul > li'
