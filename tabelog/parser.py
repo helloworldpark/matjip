@@ -1,5 +1,6 @@
 from utils.url import URL
 from utils.http import get_html
+from utils.excel import ExcelConvertible
 from bs4 import BeautifulSoup
 import re
 
@@ -25,7 +26,7 @@ class TabelogURL(URL):
         )
 
 
-class TabelogInfo:
+class TabelogInfo(ExcelConvertible):
 
     def __init__(self, name, rating, reviews, price_night, price_noon):
         """
@@ -46,23 +47,23 @@ class TabelogInfo:
         self.price_night = price_night
         self.price_noon = price_noon
 
+    def column_names(self):
+        return ['name', 'rating', 'reviews', 'price_night', 'price_noon']
+
 
 def collect_info_sapporo(page):
     url_sapporo = TabelogURL(ken='hokkaido', city='札幌市', page=page)
     body, ok = get_html(url=url_sapporo.url())
     if not ok:
         print("Not OK")
-        return False, page
+        return False, page, []
 
     # start parsing
     soup = BeautifulSoup(body, features="lxml")
+    shops = soup.select('#column-main > ul > li')
 
-    shops = soup.select(
-        '#column-main > ul > li'
-    )
-
+    info_list = []
     for shop in shops:
-        print('---------')
         name_soup = shop.select('div.list-rst__header > div > div > div > a')
         if not name_soup:
             continue
@@ -70,15 +71,13 @@ def collect_info_sapporo(page):
         rate_soup = shop.select('div.list-rst__body > div.list-rst__contents > div.list-rst__rst-data > div.list-rst__rate')[0]
 
         rating_soup = rate_soup.find_all('p', class_=re.compile("^c-rating"))
-        rating_soup = rating_soup[0] if rating_soup else None
         review_soup = rate_soup.select('p.list-rst__rvw-count > a')
-        review_soup = review_soup[0] if review_soup else None
         price_night_soup = shop.select('div.list-rst__body > div.list-rst__contents > div.list-rst__rst-data > ul.list-rst__budget > li:nth-child(1) > span.c-rating__val.list-rst__budget-val.cpy-dinner-budget-val')
         price_noon_soup = shop.select('div.list-rst__body > div.list-rst__contents > div.list-rst__rst-data > ul.list-rst__budget > li:nth-child(2) > span.c-rating__val.list-rst__budget-val.cpy-lunch-budget-val')
 
         name = name_soup[0].text
-        rating = rating_soup.text if rating_soup else '-1'
-        review = review_soup.text if review_soup else '0件'
+        rating = rating_soup[0].text if rating_soup else '-1'
+        review = review_soup[0].text if review_soup else '0件'
         price_night = price_night_soup[0].text if price_night_soup else '-'
         price_noon = price_noon_soup[0].text if price_noon_soup else '-'
 
@@ -105,6 +104,11 @@ def collect_info_sapporo(page):
             price_noon = price_noon.replace(',', '')
             price_noon = int(price_noon)
 
-        print("{:s}: {:.2f}({:d}), {:d} / {:d}".format(name, rating, review, price_night, price_noon))
+        info = TabelogInfo(name=name, rating=rating, reviews=review, price_night=price_night, price_noon=price_noon)
+        info_list.append(info)
 
-    return True, page
+    return True, page, info_list
+
+
+def collect_info_sapporo_all():
+    pass
