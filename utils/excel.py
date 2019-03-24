@@ -1,8 +1,6 @@
 import abc
 import pandas as pd
-from typing import Union
 import os
-import traceback
 
 
 class ExcelConvertible(metaclass=abc.ABCMeta):
