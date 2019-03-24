@@ -77,11 +77,34 @@ def collect_info_sapporo(page):
         price_noon_soup = shop.select('div.list-rst__body > div.list-rst__contents > div.list-rst__rst-data > ul.list-rst__budget > li:nth-child(2) > span.c-rating__val.list-rst__budget-val.cpy-lunch-budget-val')
 
         name = name_soup[0].text
-        rating = rating_soup.text if rating_soup else '-'
-        review = review_soup.text if review_soup else '0'
+        rating = rating_soup.text if rating_soup else '-1'
+        review = review_soup.text if review_soup else '0件'
         price_night = price_night_soup[0].text if price_night_soup else '-'
         price_noon = price_noon_soup[0].text if price_noon_soup else '-'
 
-        print("{:s}: {:s}({:s}), {:s} / {:s}".format(name, rating, review, price_night, price_noon))
+        name = str(name).lstrip().rstrip()
+        rating = str(rating).lstrip().rstrip()
+        rating = float(rating)
+        review = str(review).lstrip().rstrip().rstrip("件")
+        review = int(review)
+        if price_night == '-':
+            price_night = -1
+        else:
+            price_night = str(price_night).lstrip().rstrip()
+            price_night = price_night.split(sep='～')
+            price_night = price_night[-1].lstrip('￥')
+            price_night = price_night.replace(',', '')
+            price_night = int(price_night)
+
+        if price_noon == '-':
+            price_noon = -1
+        else:
+            price_noon = str(price_noon).lstrip().rstrip()
+            price_noon = price_noon.split(sep='～')
+            price_noon = price_noon[-1].lstrip('￥')
+            price_noon = price_noon.replace(',', '')
+            price_noon = int(price_noon)
+
+        print("{:s}: {:.2f}({:d}), {:d} / {:d}".format(name, rating, review, price_night, price_noon))
 
     return True, page
