@@ -1,6 +1,7 @@
 from utils.url import URL
 from utils.http import get_html
 from bs4 import BeautifulSoup
+import re
 
 
 class TabelogURL(URL):
@@ -48,7 +49,6 @@ class TabelogInfo:
 
 def collect_info_sapporo(page):
     url_sapporo = TabelogURL(ken='hokkaido', city='札幌市', page=page)
-    print(url_sapporo.url())
     body, ok = get_html(url=url_sapporo.url())
     if not ok:
         print("Not OK")
@@ -66,14 +66,19 @@ def collect_info_sapporo(page):
         name_soup = shop.select('div.list-rst__header > div > div > div > a')
         if not name_soup:
             continue
-        rating_soup = shop.select('div.list-rst__body > div.list-rst__contents > div.list-rst__rst-data > div.list-rst__rate > p.c-rating.c-rating--xl.c-rating--val30.list-rst__rating-total.cpy-total-score > span')
-        review_soup = shop.select('div.list-rst__body > div.list-rst__contents > div.list-rst__rst-data > div.list-rst__rate > p.list-rst__rvw-count > a')
+
+        rate_soup = shop.select('div.list-rst__body > div.list-rst__contents > div.list-rst__rst-data > div.list-rst__rate')[0]
+
+        rating_soup = rate_soup.find_all('p', class_=re.compile("^c-rating"))
+        rating_soup = rating_soup[0] if rating_soup else None
+        review_soup = rate_soup.select('p.list-rst__rvw-count > a')
+        review_soup = review_soup[0] if review_soup else None
         price_night_soup = shop.select('div.list-rst__body > div.list-rst__contents > div.list-rst__rst-data > ul.list-rst__budget > li:nth-child(1) > span.c-rating__val.list-rst__budget-val.cpy-dinner-budget-val')
         price_noon_soup = shop.select('div.list-rst__body > div.list-rst__contents > div.list-rst__rst-data > ul.list-rst__budget > li:nth-child(2) > span.c-rating__val.list-rst__budget-val.cpy-lunch-budget-val')
 
         name = name_soup[0].text
-        rating = rating_soup[0].text if rating_soup else '-'
-        review = review_soup[0].text if review_soup else '0'
+        rating = rating_soup.text if rating_soup else '-'
+        review = review_soup.text if review_soup else '0'
         price_night = price_night_soup[0].text if price_night_soup else '-'
         price_noon = price_noon_soup[0].text if price_noon_soup else '-'
 

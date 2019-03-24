@@ -4,4 +4,4 @@ from tabelog import parser
 
 
 if __name__ == '__main__':
-    parser.collect_info_sapporo(page=30)
+    parser.collect_info_sapporo(page=1)
