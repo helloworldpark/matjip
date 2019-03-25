@@ -3,7 +3,6 @@ from utils.http import get_html
 from utils.excel import ExcelConvertible, to_excel
 from utils.pool import distribute_work
 from bs4 import BeautifulSoup
-from time import sleep
 import re
 
 
@@ -130,11 +129,13 @@ def collect_info_sapporo_all(total_pages, pools=4):
     def task_generator():
         return range(total_pages), total_pages
 
+    # Distribute crawling tasks
     tabelog_info_list = distribute_work(task_generator=task_generator,
                                         func_work=collect_info_sapporo,
                                         time_sleep=0.5,
                                         pools=pools)
-
+    # Merge nested lists
+    tabelog_info_list = [x for sub_list in tabelog_info_list for x in sub_list]
     # Save to excel
     to_excel(convertible=tabelog_info_list, filename='tabelog_sapporo_201903231930.xlsx')
     print("Saved to excel")
