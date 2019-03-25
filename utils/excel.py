@@ -41,3 +41,7 @@ def to_excel(convertible, filename):
     writer.save()
 
 
+def from_excel(filepath):
+    with open(filepath, mode='rb') as o:
+        excel = pd.read_excel(o, index_col=0)
+    return excel
