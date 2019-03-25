@@ -33,11 +33,7 @@ def to_excel(convertible, filename):
     except StopIteration:
         pass
     except TypeError:
-        for col in convertible.column_names():
-            if col in df_dict:
-                df_dict[col].append(convertible.__dict__[col])
-            else:
-                df_dict[col] = [convertible.__dict__[col]]
+        df_dict = {col: [convertible.__dict__[col]] for col in convertible.column_names()}
 
     writer = pd.ExcelWriter(os.path.join('tmp', filename))
     df = pd.DataFrame(data=df_dict)
