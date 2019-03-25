@@ -14,11 +14,11 @@ def __worker(work, time_sleep, task_queue, done_queue):
     :type task_queue: Queue
     :param done_queue:
     :type done_queue: Queue
-    :return:
+    :return: (Result of the work, Success, Task ID)
     """
     for task in iter(task_queue.get, 'STOP'):
         ok, result = work(task)
-        done_queue.put((result, task))
+        done_queue.put((result, ok, task))
         if ok:
             print("OK   {}".format(task))
         else:
@@ -66,18 +66,19 @@ def distribute_work(task_generator, func_work, time_sleep, pools=4):
     failed_once = set()
     while len(success_once) + len(failed_once) != total_task or not queue_task.empty():
         try:
-            result = queue_done.get()
+            result, ok, task_id = queue_done.get()
         except:
             continue
 
-        if result[0]:
-            success_once.add(result[1])
-            result_list.append(result[0])
+        if ok:
+            success_once.add(task_id)
+            if result is not None:
+                result_list.append(result)
         else:
             # Retry once
-            if result[1] not in failed_once:
-                failed_once.add(result[1])
-                queue_task.put(result[1])
+            if task_id not in failed_once:
+                failed_once.add(task_id)
+                queue_task.put(task_id)
 
     # Stop
     for _ in range(pools):
