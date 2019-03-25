@@ -1,10 +1,10 @@
 from utils.url import URL
 from utils.http import get_html
 from utils.excel import ExcelConvertible, to_excel
+from utils.pool import distribute_work
 from bs4 import BeautifulSoup
 from time import sleep
 import re
-from multiprocessing import Process, Queue
 
 
 class TabelogURL(URL):
@@ -92,8 +92,7 @@ def collect_info_sapporo(page):
             rating = -1
 
         try:
-            review = reformat_str(review).rstrip("件")
-            review = int(review)
+            review = int(reformat_str(review).rstrip("件"))
         except:
             review = 0
 
@@ -127,70 +126,14 @@ def collect_info_sapporo(page):
     return True, info_list
 
 
-def create_task(pages):
-    return range(pages)
-
-
-def collect_worker(task, done):
-    for page in iter(task.get, 'STOP'):
-        ok, info = collect_info_sapporo(page=page)
-        done.put((info, page))
-        if ok:
-            print("OK   {}".format(page))
-        else:
-            print("FAIL {}".format(page))
-
-        sleep(2)
-
-
 def collect_info_sapporo_all(total_pages, pools=4):
+    def task_generator():
+        return range(total_pages), total_pages
 
-    # https://docs.python.org/ko/3/library/multiprocessing.html#multiprocessing-examples
-
-    # Distribute pages to crawl
-    tasks = create_task(total_pages)
-
-    # Create queues
-    queue_task = Queue()
-    queue_done = Queue()
-
-    # Submit tasks
-    for task in tasks:
-        queue_task.put(task)
-
-    # Start worker process
-    for _ in range(pools):
-        Process(target=collect_worker, args=(queue_task, queue_done)).start()
-
-    print("Started!")
-
-    # Collect unordered results
-    tabelog_info_list = []
-    success_once = set()
-    failed_once = set()
-    while len(success_once) + len(failed_once) != total_pages or not queue_task.empty():
-        try:
-            result = queue_done.get()
-        except:
-            continue
-
-        if result[0]:
-            success_once.add(result[1])
-            for i in result[0]:
-                tabelog_info_list.append(i)
-        else:
-            if result[1] not in failed_once:
-                failed_once.add(result[1])
-                queue_task.put(result[1])
-
-    # Stop
-    for _ in range(pools):
-        queue_task.put('STOP')
-
-    for page_fail in failed_once:
-        print("Failed {}".format(page_fail))
-
-    print("Stopped all")
+    tabelog_info_list = distribute_work(task_generator=task_generator,
+                                        func_work=collect_info_sapporo,
+                                        time_sleep=0.5,
+                                        pools=pools)
 
     # Save to excel
     to_excel(convertible=tabelog_info_list, filename='tabelog_sapporo_201903231930.xlsx')
