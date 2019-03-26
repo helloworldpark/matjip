@@ -16,6 +16,10 @@ lxml = {version=">=4.3.2", index="kakao"}
 openpyxl = {version=">=2.5.4", index="kakao"}
 xlrd = {version=">=1.1.0", index="kakao"}
 pandas = {version=">=0.24.0", index="kakao"}
+matplotlib = {version=">=2.2.2", index="kakao"}
+numpy = {version=">=1.14.4", index="kakao"}
+scikit-learn = {version=">=0.19.2", index="kakao"}
+scipy = {version=">=1.1.0", index="kakao"}
 
 [requires]
 python_version = "3.7"
