@@ -31,15 +31,15 @@ class TabelogInfo(ExcelConvertible):
 
     def __init__(self, name, rating, reviews, price_night, price_noon):
         """
-        :param name:
+        :param name: 점포명
         :type name: str
-        :param rating:
+        :param rating: 평점
         :type rating: float
-        :param reviews:
+        :param reviews: 평가 갯수
         :type reviews: int
-        :param price_night:
+        :param price_night: 저녁시간대 가격대
         :type price_night: float
-        :param price_noon:
+        :param price_noon: 점심시간대 가격대
         :type price_noon: float
         """
         self.name = name
@@ -53,6 +53,13 @@ class TabelogInfo(ExcelConvertible):
 
 
 def collect_info_sapporo(page):
+    """
+    삿포로의 맛집 정보를 수집합니다
+    :param page: 맛집의 페이지. 1페이지부터 60페이지까지 조회 가능하다.
+    :type page: int
+    :return: HTTP 요청 성공 여부, 가공한 정보인 TabelogInfo의 리스트
+    :rtype: bool, List[TabelogInfo]
+    """
     url_sapporo = TabelogURL(ken='hokkaido', city='札幌市', page=page)
     body, ok = get_html(url=url_sapporo.url())
     if not ok:
@@ -127,7 +134,7 @@ def collect_info_sapporo(page):
 
 def collect_info_sapporo_all(total_pages, pools=4):
     def task_generator():
-        return range(total_pages), total_pages
+        return range(1, total_pages+1)
 
     # Distribute crawling tasks
     tabelog_info_list = distribute_work(task_generator=task_generator,

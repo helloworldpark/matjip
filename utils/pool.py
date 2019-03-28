@@ -31,7 +31,7 @@ def distribute_work(task_generator, func_work, time_sleep, pools=4):
     """
 
     :param task_generator:
-    :type task_generator: Callable[[], (Iterable, int)]
+    :type task_generator: Callable[[], List]
     :param func_work:
     :type func_work: Callable[[object], (bool, object)]
     :param time_sleep:
@@ -44,7 +44,7 @@ def distribute_work(task_generator, func_work, time_sleep, pools=4):
     # https://docs.python.org/ko/3/library/multiprocessing.html#multiprocessing-examples
 
     # Distribute pages to crawl
-    tasks, total_task = task_generator()
+    tasks = task_generator()
 
     # Create queues
     queue_task = Queue()
@@ -64,7 +64,7 @@ def distribute_work(task_generator, func_work, time_sleep, pools=4):
     result_list = []
     success_once = set()
     failed_once = set()
-    while len(success_once) + len(failed_once) != total_task or not queue_task.empty():
+    while len(success_once) + len(failed_once) != len(tasks) or not queue_task.empty():
         try:
             result, ok, task_id = queue_done.get()
         except:

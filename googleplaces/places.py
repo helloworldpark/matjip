@@ -184,11 +184,11 @@ def get_place_detail(place, key):
 def collect_from_google(tabelog_path, key):
 
     # Load Tabelog
-    tabelog = from_excel(filepath=tabelog_path)
+    tabelog = from_excel(file_path=tabelog_path)
 
     # Define task
     def task_generator():
-        return range(tabelog.shape[0]), tabelog.shape[0]
+        return range(tabelog.shape[0])
 
     # Define work: update dataframe
     def work(idx):
