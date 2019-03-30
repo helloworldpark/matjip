@@ -3,8 +3,6 @@ from utils.http import get_json
 from utils.excel import from_excel, to_excel, ExcelConvertible
 from typing import List
 from functools import reduce
-import pandas as pd
-import os
 from utils.pool import distribute_work
 
 
